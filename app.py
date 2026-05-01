@@ -209,8 +209,7 @@ Return this exact JSON structure:
 def parse_response(raw: str) -> dict:
     # Strip markdown code fences if present
     clean = re.sub(r"```[a-zA-Z]*", "", raw)
-    clean = clean.replace("
-```", "").strip()
+    clean = clean.replace("```", "").strip()
     return json.loads(clean)
 
 # ── Analyze function ──────────────────────────────────────────────────────────
