@@ -209,7 +209,8 @@ Return this exact JSON structure:
 def parse_response(raw: str) -> dict:
     # Strip markdown code fences if present
     clean = re.sub(r"```[a-zA-Z]*", "", raw)
-    clean = clean.replace("```", "").strip()
+    clean = clean.replace("
+```", "").strip()
     return json.loads(clean)
 
 # ── Analyze function ──────────────────────────────────────────────────────────
@@ -246,6 +247,19 @@ def score_color(score: int) -> str:
     if score < 60: return "#fbbf24"
     return "#f87171"
 
+# ── Callbacks for state management ────────────────────────────────────────────
+def reset_app():
+    st.session_state.input_text = ""
+    st.session_state.results = None
+
+def load_sample_jd():
+    st.session_state.input_text = SAMPLE_JD
+    st.session_state.results = None
+
+def load_sample_pr():
+    st.session_state.input_text = SAMPLE_PR
+    st.session_state.results = None
+
 # ── Session state init ────────────────────────────────────────────────────────
 if "input_text" not in st.session_state:
     st.session_state.input_text = ""
@@ -273,20 +287,14 @@ with st.sidebar:
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📄 Job Post", use_container_width=True):
-            st.session_state.input_text = SAMPLE_JD
-            st.session_state.results = None
-            st.rerun()
+        st.button("📄 Job Post", use_container_width=True, on_click=load_sample_jd)
     with col2:
-        if st.button("📊 Perf. Review", use_container_width=True):
-            st.session_state.input_text = SAMPLE_PR
-            st.session_state.results = None
-            st.rerun()
+        st.button("📊 Perf. Review", use_container_width=True, on_click=load_sample_pr)
 
     st.markdown("---")
     st.markdown("### ℹ️ About")
     st.markdown("""
-BiasLens AI uses **Gemini 1.5 Flash** to detect unconscious bias in:
+BiasLens AI uses **Gemini 2.5 Flash** to detect unconscious bias in:
 - 📋 Job descriptions
 - 📊 Performance reviews
 - 📝 Corporate communications
@@ -336,10 +344,7 @@ with col_a:
         disabled=not input_text.strip(),
     )
 with col_b:
-    if st.button("🗑️ Clear", use_container_width=True):
-        st.session_state.input_text = ""
-        st.session_state.results = None
-        st.rerun()
+    st.button("🗑️ Clear", use_container_width=True, on_click=reset_app)
 with col_c:
     word_count = len(input_text.split()) if input_text.strip() else 0
     st.markdown(
@@ -500,10 +505,7 @@ if st.session_state.results:
 
     # ── Reset
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🔄 Analyze New Text", type="secondary"):
-        st.session_state.results = None
-        st.session_state.input_text = ""
-        st.rerun()
+    st.button("🔄 Analyze New Text", type="secondary", on_click=reset_app)
 
 # ── Empty state ───────────────────────────────────────────────────────────────
 elif not analyze_clicked:
